@@ -6,7 +6,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.converter.gson.GsonConverterFactory
 
-class ApiManager {
+object ApiManager {
 
     private lateinit var retrofit: Retrofit // Retrofit instance for API calls
 

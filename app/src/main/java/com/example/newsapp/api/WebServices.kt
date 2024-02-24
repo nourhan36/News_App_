@@ -9,7 +9,7 @@ interface WebServices {
 
     @GET("v2/top-headlines/sources")
     fun getNewsSources(
-        @Query("apiKey") apiKey: String
+        @Query("apiKey") apiKey: String = Constants.apiKey
     ): Call<SourcesResponse>
 
 }
