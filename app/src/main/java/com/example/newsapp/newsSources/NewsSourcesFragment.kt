@@ -6,10 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.example.newsapp.R
 import com.example.newsapp.api.ApiManager
 import com.example.newsapp.api.model.sourcesResponse.Source
 import com.example.newsapp.api.model.sourcesResponse.SourcesResponse
 import com.example.newsapp.databinding.FragmentNewsSourcesBinding
+import com.example.newsapp.newsFragment.NewsFragment
+import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,7 +35,12 @@ class NewsSourcesFragment : Fragment() {
         getNewsSources()
     }
 
+    val newsFragment = NewsFragment()
     private fun initViews() {
+        childFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, newsFragment)
+            .commit()
         viewBinding.tryAgain.setOnClickListener {
             viewBinding.errorView.isVisible = false
             getNewsSources()
@@ -79,8 +87,23 @@ class NewsSourcesFragment : Fragment() {
         sources?.forEach { source ->
             val tab = viewBinding.tabLayout.newTab()
             tab.text = source?.name
+            tab.tag = source // tag
             viewBinding.tabLayout.addTab(tab)
         }
+        viewBinding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val source = tab?.tag as Source // will return as object so need casting
+                newsFragment.changeSource(source)  // hrbot l view b object "tag 3obara 3n object"
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                val source = tab?.tag as Source
+                newsFragment.changeSource(source)
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
+        })
     }
 
     private fun showError(message: String?) {
