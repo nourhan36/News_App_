@@ -73,8 +73,9 @@ class NewsFragment : Fragment() {
         }
     }
 
+    val adapter = NewsAdapter(null)
     private fun showNewsList(articles: List<Article?>?) {
-
+        adapter.changeData(articles)
     }
 
     private fun showError(message: String?) {
@@ -88,6 +89,10 @@ class NewsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initViews()
+    }
 
+    private fun initViews() {
+        viewBinding.newsRecycler.adapter = adapter
     }
 }

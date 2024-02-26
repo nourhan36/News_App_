@@ -104,6 +104,7 @@ class NewsSourcesFragment : Fragment() {
             override fun onTabUnselected(tab: TabLayout.Tab?) {
             }
         })
+        viewBinding.tabLayout.getTabAt(0)?.select()
     }
 
     private fun showError(message: String?) {
