@@ -17,12 +17,14 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class NewsFragment : Fragment() {
-    lateinit var viewBinding: FragmentNewsBinding
+    private lateinit var viewBinding: FragmentNewsBinding
+    private var source: Source? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         viewBinding = FragmentNewsBinding.inflate(
             inflater,
             container,
@@ -31,7 +33,11 @@ class NewsFragment : Fragment() {
         return viewBinding.root
     }
 
-    var source: Source? = null
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initViews()
+    }
+
     fun changeSource(source: Source) {
         this.source = source
         loadNews()
@@ -39,11 +45,6 @@ class NewsFragment : Fragment() {
 
     private fun loadNews() {
         changeLoadingVisibility(true)
-        /*if(source!=null && source?.id!=null) {
-            ApiManager.getServices()
-                .getNews(sources = source?.id ?: "")
-        }*/
-        // instead of this -> use let
         source?.id?.let { sourceId ->
             ApiManager.getServices()
                 .getNews(sources = sourceId)
@@ -60,20 +61,21 @@ class NewsFragment : Fragment() {
                         changeLoadingVisibility(false)
                         if (response.isSuccessful) {
                             showNewsList(response.body()?.articles)
-                            return
+                        } else {
+                            val responseJson = response.errorBody()?.string()
+                            val errorResponse = Gson().fromJson(
+                                responseJson,
+                                NewsResponse::class.java
+                            )
+                            showError(errorResponse.message)
                         }
-                        val responseJson = response.errorBody()?.string()
-                        val errorResponse = Gson().fromJson(
-                            responseJson,
-                            NewsResponse::class.java
-                        )
-                        showError(errorResponse.message)
                     }
                 })
         }
     }
 
-    val adapter = NewsAdapter(null)
+    private val adapter = NewsAdapter(null)
+
     private fun showNewsList(articles: List<Article?>?) {
         adapter.changeData(articles)
     }
@@ -83,13 +85,8 @@ class NewsFragment : Fragment() {
         viewBinding.errorMessage.text = message
     }
 
-    fun changeLoadingVisibility(isLoadingVisible: Boolean) {
+    private fun changeLoadingVisibility(isLoadingVisible: Boolean) {
         viewBinding.progressBar.isVisible = isLoadingVisible
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        initViews()
     }
 
     private fun initViews() {

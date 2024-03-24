@@ -8,16 +8,16 @@ import retrofit2.http.Query
 
 interface WebServices {
 
-    @GET("v2/top-headlines/sources")
+    @GET("v2/top-headlines/sources") // later we define Base URL
     fun getNewsSources(
-        @Query("apiKey") apiKey: String = Constants.apiKey
-    ): Call<SourcesResponse>
+        @Query("category") category: String,
+        @Query("apiKey") apiKey: String = Constants.apiKey,
+    ): Call<SourcesResponse> //Template Parameter, Map JSON to Class
 
     @GET("v2/everything")
     fun getNews(
         @Query("apiKey") apiKey: String = Constants.apiKey,
-        @Query("sources") sources: String
+        @Query("sources") sources: String,
+
     ):Call<NewsResponse>
-
-
 }

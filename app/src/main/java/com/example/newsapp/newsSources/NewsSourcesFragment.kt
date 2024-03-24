@@ -19,12 +19,15 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class NewsSourcesFragment : Fragment() {
-    lateinit var viewBinding: FragmentNewsSourcesBinding
+    private lateinit var viewBinding: FragmentNewsSourcesBinding
+    val newsFragment = NewsFragment()
+    private var category: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         viewBinding = FragmentNewsSourcesBinding.inflate(inflater, container, false)
         return viewBinding.root
     }
@@ -35,7 +38,6 @@ class NewsSourcesFragment : Fragment() {
         getNewsSources()
     }
 
-    val newsFragment = NewsFragment()
     private fun initViews() {
         childFragmentManager
             .beginTransaction()
@@ -47,11 +49,21 @@ class NewsSourcesFragment : Fragment() {
         }
     }
 
+    fun changeCategory(category: String) {
+        this.category = category
+        getNewsSources()
+    }
+
     private fun getNewsSources() {
-        changeLoadingVisibility(true)
+        if (::viewBinding.isInitialized) {
+            changeLoadingVisibility(true)
+        } else {
+            return
+        }
+
         ApiManager
             .getServices()
-            .getNewsSources()
+            .getNewsSources(category = category ?: "")
             .enqueue(object : Callback<SourcesResponse> {
                 override fun onFailure(
                     call: Call<SourcesResponse>,
@@ -61,7 +73,6 @@ class NewsSourcesFragment : Fragment() {
                     showError(t.message)
                 }
 
-
                 override fun onResponse(
                     call: Call<SourcesResponse>,
                     response: Response<SourcesResponse>
@@ -69,21 +80,26 @@ class NewsSourcesFragment : Fragment() {
                     changeLoadingVisibility(false)
                     if (response.isSuccessful) {
                         showNewsSources(response.body()?.sources)
-                        return
+                    } else {
+                        val responseJson = response.errorBody()?.string()
+                        val errorResponse = Gson().fromJson(
+                            responseJson,
+                            SourcesResponse::class.java
+                        )
+                        showError(errorResponse.message)
                     }
-                    val responseJson = response.errorBody()?.string()
-                    val errorResponse = Gson().fromJson(
-                        responseJson,
-                        SourcesResponse::class.java
-                    )
-                    showError(errorResponse.message)
                 }
             })
     }
 
     private fun showNewsSources(sources: List<Source?>?) {
-        viewBinding.errorView.isVisible = false
-        viewBinding.progressBar.isVisible = false
+        if (::viewBinding.isInitialized) {
+            viewBinding.errorView.isVisible = false
+            viewBinding.progressBar.isVisible = false
+        } else {
+            return
+        }
+
         sources?.forEach { source ->
             val tab = viewBinding.tabLayout.newTab()
             tab.text = source?.name
@@ -93,7 +109,7 @@ class NewsSourcesFragment : Fragment() {
         viewBinding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val source = tab?.tag as Source // will return as object so need casting
-                newsFragment.changeSource(source)  // hrbot l view b object "tag 3obara 3n object"
+                newsFragment.changeSource(source) // hrbot l view b object "tag 3obara 3n object"
             }
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -108,11 +124,19 @@ class NewsSourcesFragment : Fragment() {
     }
 
     private fun showError(message: String?) {
-        viewBinding.errorView.isVisible = true
-        viewBinding.errorMessage.text = message
+        if (::viewBinding.isInitialized) {
+            viewBinding.errorView.isVisible = true
+            viewBinding.errorMessage.text = message
+        } else {
+            return
+        }
     }
 
     fun changeLoadingVisibility(isLoadingVisible: Boolean) {
-        viewBinding.progressBar.isVisible = isLoadingVisible
+        if (::viewBinding.isInitialized) {
+            viewBinding.progressBar.isVisible = isLoadingVisible
+        } else {
+            return
+        }
     }
 }
