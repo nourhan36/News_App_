@@ -1,4 +1,4 @@
-package com.example.newsapp.ui
+package com.example.newsapp.ui.settings
 
 import android.content.res.Configuration
 import android.os.Bundle

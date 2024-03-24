@@ -1,4 +1,4 @@
-package com.example.newsapp.ui
+package com.example.newsapp.ui.categories
 
 import android.os.Bundle
 import android.view.LayoutInflater

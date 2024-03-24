@@ -1,4 +1,4 @@
-package com.example.newsapp.ui
+package com.example.newsapp.ui.articleDetails
 
 import android.content.Intent
 import android.net.Uri
@@ -37,7 +37,7 @@ class ArticleDetailsFragment : Fragment() {
             .placeholder(R.drawable.ic_launcher_foreground)
             .into(viewBinding.articleImage)
         viewBinding.articlePublishAt.text = article.publishedAt
-        viewBinding.tvArticleBody.text = article.content
+        viewBinding.tvArticleBody.text = article.description
         viewBinding.tvViewArticle.setOnClickListener {
             openArticleUrl(article.url)
         }

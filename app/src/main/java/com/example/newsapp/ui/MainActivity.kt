@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import com.example.newsapp.R
 import com.example.newsapp.databinding.ActivityMainBinding
 import com.example.newsapp.newsSources.NewsSourcesFragment
+import com.example.newsapp.ui.categories.CategoriesFragment
+import com.example.newsapp.ui.settings.SettingsFragment
 
 class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListener {
     private lateinit var viewBinding: ActivityMainBinding

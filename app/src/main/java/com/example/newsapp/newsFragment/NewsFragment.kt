@@ -13,7 +13,7 @@ import com.example.newsapp.api.model.newsResponse.Article
 import com.example.newsapp.api.model.newsResponse.NewsResponse
 import com.example.newsapp.api.model.sourcesResponse.Source
 import com.example.newsapp.databinding.FragmentNewsBinding
-import com.example.newsapp.ui.ArticleDetailsFragment
+import com.example.newsapp.ui.articleDetails.ArticleDetailsFragment
 import com.example.newsapp.ui.MainActivity
 import com.google.gson.Gson
 import retrofit2.Call
@@ -76,7 +76,7 @@ class NewsFragment : Fragment() {
         source?.id?.let { sourceId ->
             ApiManager.getServices()
                 .getNews(sources = sourceId)
-                .enqueue(object : Callback<NewsResponse> {
+                .enqueue(object : Callback<NewsResponse>{
                     override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
                         changeLoadingVisibility(false)
                         showError(t.message)

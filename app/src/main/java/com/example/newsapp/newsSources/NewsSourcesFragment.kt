@@ -63,10 +63,9 @@ class NewsSourcesFragment : Fragment() {
             return
         }
 
-        val currentLanguage = getCurrentLanguage(requireContext())
         ApiManager
             .getServices()
-            .getNewsSources(category = category ?: "", language = currentLanguage)
+            .getNewsSources(category = category ?: "")
             .enqueue(object : Callback<SourcesResponse> {
                 override fun onFailure(
                     call: Call<SourcesResponse>,
@@ -143,12 +142,4 @@ class NewsSourcesFragment : Fragment() {
         }
     }
 
-    private fun getCurrentLanguage(context: Context): String {
-        val configuration = context.resources.configuration
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            configuration.locales[0].language
-        } else {
-            configuration.locale.language
-        }
-    }
 }
