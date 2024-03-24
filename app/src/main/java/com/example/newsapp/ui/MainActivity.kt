@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListen
 
         categoriesFragment.categoryClickListener = this
         pushFragment(categoriesFragment)
+        //pushFragment(SettingsFragment())
     }
 
     override fun onCategoryClicked(category: String) {
