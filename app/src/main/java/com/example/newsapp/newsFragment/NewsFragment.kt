@@ -6,11 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import com.example.newsapp.R
 import com.example.newsapp.api.ApiManager
+import com.example.newsapp.api.Constants
 import com.example.newsapp.api.model.newsResponse.Article
 import com.example.newsapp.api.model.newsResponse.NewsResponse
 import com.example.newsapp.api.model.sourcesResponse.Source
 import com.example.newsapp.databinding.FragmentNewsBinding
+import com.example.newsapp.ui.ArticleDetailsFragment
+import com.example.newsapp.ui.MainActivity
 import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,6 +22,7 @@ import retrofit2.Response
 
 class NewsFragment : Fragment() {
     private lateinit var viewBinding: FragmentNewsBinding
+    private val articleDetailsFragment = ArticleDetailsFragment()
     private var source: Source? = null
 
     override fun onCreateView(
@@ -36,6 +41,29 @@ class NewsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
+        initSearch()
+        initArticle()
+    }
+
+    private fun initArticle() {
+        adapter.setOnArticleClickListener{article ->
+            val arguments = Bundle().apply {
+                putParcelable(Constants.ARTICLE, article)
+            }
+            articleDetailsFragment.arguments = arguments
+
+            parentFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, articleDetailsFragment)
+                .addToBackStack("")
+                .commit()
+        }
+    }
+
+    private fun initSearch() {
+        (activity as MainActivity).setOnSearchClickListener { query ->
+            loadArticles(query)
+        }
     }
 
     fun changeSource(source: Source) {
@@ -74,6 +102,34 @@ class NewsFragment : Fragment() {
         }
     }
 
+    private fun loadArticles(query: String){
+        ApiManager.getServices()
+            .getSearchArticles(query = query)
+            .enqueue(object : Callback<NewsResponse>{
+                override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
+                    changeLoadingVisibility(false)
+                    showError(t.message)
+                }
+
+                override fun onResponse(
+                    call: Call<NewsResponse>,
+                    response: Response<NewsResponse>
+                ) {
+                    changeLoadingVisibility(false)
+                    if (response.isSuccessful) {
+                        showNewsList(response.body()?.articles)
+                    } else {
+                        val responseJson = response.errorBody()?.string()
+                        val errorResponse = Gson().fromJson(
+                            responseJson,
+                            NewsResponse::class.java
+                        )
+                        showError(errorResponse.message)
+                    }
+                }
+            })
+    }
+
     private val adapter = NewsAdapter(null)
 
     private fun showNewsList(articles: List<Article?>?) {
@@ -92,4 +148,5 @@ class NewsFragment : Fragment() {
     private fun initViews() {
         viewBinding.newsRecycler.adapter = adapter
     }
+
 }

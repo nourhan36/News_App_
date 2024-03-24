@@ -1,5 +1,6 @@
 package com.example.newsapp.newsSources
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,6 +43,7 @@ class NewsSourcesFragment : Fragment() {
         childFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container, newsFragment)
+            .addToBackStack("")
             .commit()
         viewBinding.tryAgain.setOnClickListener {
             viewBinding.errorView.isVisible = false
@@ -61,9 +63,10 @@ class NewsSourcesFragment : Fragment() {
             return
         }
 
+        val currentLanguage = getCurrentLanguage(requireContext())
         ApiManager
             .getServices()
-            .getNewsSources(category = category ?: "")
+            .getNewsSources(category = category ?: "", language = currentLanguage)
             .enqueue(object : Callback<SourcesResponse> {
                 override fun onFailure(
                     call: Call<SourcesResponse>,
@@ -137,6 +140,15 @@ class NewsSourcesFragment : Fragment() {
             viewBinding.progressBar.isVisible = isLoadingVisible
         } else {
             return
+        }
+    }
+
+    private fun getCurrentLanguage(context: Context): String {
+        val configuration = context.resources.configuration
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            configuration.locales[0].language
+        } else {
+            configuration.locale.language
         }
     }
 }

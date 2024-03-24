@@ -1,8 +1,10 @@
 package com.example.newsapp.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.example.newsapp.R
 import com.example.newsapp.databinding.ActivityMainBinding
@@ -13,6 +15,8 @@ class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListen
     private val newsSourcesFragment = NewsSourcesFragment()
     private val categoriesFragment = CategoriesFragment()
     private val settingsFragment = SettingsFragment()
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -21,6 +25,8 @@ class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListen
         viewBinding.imvMenu.setOnClickListener {
             viewBinding.root.openDrawer(GravityCompat.START)
         }
+
+        changeSearchVisibility(false)
 
         viewBinding.navigationView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
@@ -47,6 +53,19 @@ class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListen
         categoriesFragment.categoryClickListener = this
         pushFragment(categoriesFragment)
         //pushFragment(SettingsFragment())
+
+        viewBinding.imvSearch.setOnClickListener {
+            changeSearchVisibility(true)
+        }
+
+        viewBinding.ivClose.setOnClickListener {
+            changeSearchVisibility(false)
+        }
+
+        viewBinding.etSearch.setOnEditorActionListener { view, _, _ ->
+            onSearchClickListener?.onSearchClick(view.text.toString())
+            true
+        }
     }
 
     override fun onCategoryClicked(category: String) {
@@ -58,8 +77,25 @@ class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListen
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_container, fragment)
+            .addToBackStack("")
             .commit()
 
         viewBinding.root.closeDrawer(GravityCompat.START)
+    }
+
+    private var onSearchClickListener: OnSearchClickListener? = null
+    fun setOnSearchClickListener(listener: OnSearchClickListener) {
+        onSearchClickListener = listener
+    }
+
+    fun interface OnSearchClickListener {
+        fun onSearchClick(query: String)
+    }
+
+    private fun changeSearchVisibility(isSearchVisible: Boolean) {
+        viewBinding.searchContainer.isVisible = isSearchVisible
+        viewBinding.imvMenu.isVisible = !isSearchVisible
+        viewBinding.title.isVisible = !isSearchVisible
+        viewBinding.imvSearch.isVisible = !isSearchVisible
     }
 }

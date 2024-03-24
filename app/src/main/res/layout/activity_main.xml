@@ -14,8 +14,9 @@
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:background="@drawable/toolbar"
+            app:layout_constraintHeight_percent=".09"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.Toolbar
@@ -66,28 +67,47 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.5" />
 
-                    <EditText
-                        android:id="@+id/et_search"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/search_container"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_gravity="center"
                         android:layout_marginEnd="25dp"
-                        android:background="@drawable/search_bg"
-                        android:drawableStart="@drawable/ic_close"
-                        android:drawablePadding="12dp"
-                        android:hint="@string/search_article"
-                        android:imeOptions="actionSearch"
-                        android:inputType="textAutoComplete"
-                        android:paddingStart="12dp"
-                        android:textColor="@color/green"
-                        android:textSize="18sp"
-                        android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.5"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintVertical_bias="0.5" />
+                        app:layout_constraintVertical_bias="0.5">
+
+                        <EditText
+                            android:id="@+id/et_search"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/search_bg"
+                            android:hint="@string/search_article"
+                            android:imeOptions="actionSearch"
+                            android:inputType="textAutoComplete"
+                            android:paddingStart="42dp"
+                            android:textColor="@color/green"
+                            android:textSize="18sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/iv_close"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/ic_close"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="@id/et_search"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.5" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>

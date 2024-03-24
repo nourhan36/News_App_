@@ -11,6 +11,7 @@ interface WebServices {
     @GET("v2/top-headlines/sources") // later we define Base URL
     fun getNewsSources(
         @Query("category") category: String,
+        @Query("language") language: String,
         @Query("apiKey") apiKey: String = Constants.apiKey,
     ): Call<SourcesResponse> //Template Parameter, Map JSON to Class
 
@@ -18,6 +19,12 @@ interface WebServices {
     fun getNews(
         @Query("apiKey") apiKey: String = Constants.apiKey,
         @Query("sources") sources: String,
+    ): Call<NewsResponse>
 
-    ):Call<NewsResponse>
+    @GET("v2/everything")
+    fun getSearchArticles(
+        @Query("apiKey") apiKey: String = Constants.apiKey,
+        @Query("q") query: String,
+    ): Call<NewsResponse>
+
 }
