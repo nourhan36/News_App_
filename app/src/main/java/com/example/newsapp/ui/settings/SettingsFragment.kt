@@ -53,7 +53,6 @@ class SettingsFragment : Fragment() {
         }
     }
 
-
     private fun setLocale(languageCode: String) {
         val locale = Locale(languageCode)
         Locale.setDefault(locale)

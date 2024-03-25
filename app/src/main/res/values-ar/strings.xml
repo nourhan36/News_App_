@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">News App</string>
-    <string name="try_again">Try Again</string>
-    <string name="news_app">News App</string>
-    <string name="pick_your_category_of_interest">Pick your category \n of interest</string>
-    <string name="search_article">Search Article</string>
-    <string name="categories">Categories</string>
-    <string name="settings">Settings</string>
-    <string name="language">Language</string>
+    <string name="app_name">الأخبار</string>
+    <string name="try_again">اعادة المحاولة</string>
+    <string name="news_app">الأخبار</string>
+    <string name="pick_your_category_of_interest">اختر فئتك المفضلة</string>
+    <string name="search_article">البحث عن مقالة</string>
+    <string name="categories">الفئات</string>
+    <string name="settings">الاعدادات</string>
+    <string name="language">اللغة</string>
     <string name="english">الانجليزية</string>
     <string name="arabic">العربية</string>
 </resources>
