@@ -6,22 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.newsapp.R
-import com.example.newsapp.api.ApiManager
+import com.example.newsapp.ViewMessage
 import com.example.newsapp.api.model.sourcesResponse.Source
-import com.example.newsapp.api.model.sourcesResponse.SourcesResponse
 import com.example.newsapp.databinding.FragmentNewsSourcesBinding
 import com.example.newsapp.newsFragment.NewsFragment
 import com.google.android.material.tabs.TabLayout
-import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class NewsSourcesFragment : Fragment() {
     private lateinit var viewBinding: FragmentNewsSourcesBinding
+    private lateinit var viewModel: SourcesViewModel
     val newsFragment = NewsFragment()
     private var category: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this)[SourcesViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +37,7 @@ class NewsSourcesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        getNewsSources()
+        observeLiveData()
     }
 
     private fun initViews() {
@@ -44,62 +46,29 @@ class NewsSourcesFragment : Fragment() {
             .replace(R.id.fragment_container, newsFragment)
             .addToBackStack("")
             .commit()
-        viewBinding.tryAgain.setOnClickListener {
-            viewBinding.errorView.isVisible = false
-            getNewsSources()
+    }
+
+    private fun observeLiveData() {
+        viewModel.isLoadingVisible.observe(viewLifecycleOwner) {
+            changeLoadingVisibility(it)
+        }
+        viewModel.message.observe(viewLifecycleOwner) {
+            showError(it)
+        }
+        viewModel.sourcesLiveData.observe(viewLifecycleOwner) {
+            showNewsSources(it)
         }
     }
 
-    fun changeCategory(category: String) {
+     fun changeCategory(category: String) {
         this.category = category
-        getNewsSources()
-    }
-
-    private fun getNewsSources() {
-        if (::viewBinding.isInitialized) {
-            changeLoadingVisibility(true)
-        } else {
-            return
-        }
-
-        ApiManager
-            .getServices()
-            .getNewsSources(category = category ?: "")
-            .enqueue(object : Callback<SourcesResponse> {
-                override fun onFailure(
-                    call: Call<SourcesResponse>,
-                    t: Throwable
-                ) {
-                    changeLoadingVisibility(false)
-                    showError(t.message)
-                }
-
-                override fun onResponse(
-                    call: Call<SourcesResponse>,
-                    response: Response<SourcesResponse>
-                ) {
-                    changeLoadingVisibility(false)
-                    if (response.isSuccessful) {
-                        showNewsSources(response.body()?.sources)
-                    } else {
-                        val responseJson = response.errorBody()?.string()
-                        val errorResponse = Gson().fromJson(
-                            responseJson,
-                            SourcesResponse::class.java
-                        )
-                        showError(errorResponse.message)
-                    }
-                }
-            })
+        viewModel.getNewsSources(category)
     }
 
     private fun showNewsSources(sources: List<Source?>?) {
-        if (::viewBinding.isInitialized) {
-            viewBinding.errorView.isVisible = false
-            viewBinding.progressBar.isVisible = false
-        } else {
-            return
-        }
+
+        viewBinding.errorView.isVisible = false
+        viewBinding.progressBar.isVisible = false
 
         sources?.forEach { source ->
             val tab = viewBinding.tabLayout.newTab()
@@ -124,21 +93,17 @@ class NewsSourcesFragment : Fragment() {
         viewBinding.tabLayout.getTabAt(0)?.select()
     }
 
-    private fun showError(message: String?) {
-        if (::viewBinding.isInitialized) {
-            viewBinding.errorView.isVisible = true
-            viewBinding.errorMessage.text = message
-        } else {
-            return
+    private fun showError(message: ViewMessage) {
+        viewBinding.errorView.isVisible = true
+        viewBinding.errorMessage.text = message.message
+        viewBinding.tryAgain.text = message.posActionName
+        viewBinding.tryAgain.setOnClickListener {
+            message.posAction?.invoke()
         }
     }
 
-    fun changeLoadingVisibility(isLoadingVisible: Boolean) {
-        if (::viewBinding.isInitialized) {
-            viewBinding.progressBar.isVisible = isLoadingVisible
-        } else {
-            return
-        }
+    private fun changeLoadingVisibility(isLoadingVisible: Boolean) {
+        viewBinding.progressBar.isVisible = isLoadingVisible
     }
 
 }

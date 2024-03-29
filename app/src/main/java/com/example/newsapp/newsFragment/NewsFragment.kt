@@ -6,24 +6,27 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.newsapp.R
-import com.example.newsapp.api.ApiManager
+import com.example.newsapp.ViewMessage
 import com.example.newsapp.api.Constants
 import com.example.newsapp.api.model.newsResponse.Article
-import com.example.newsapp.api.model.newsResponse.NewsResponse
 import com.example.newsapp.api.model.sourcesResponse.Source
 import com.example.newsapp.databinding.FragmentNewsBinding
 import com.example.newsapp.ui.articleDetails.ArticleDetailsFragment
 import com.example.newsapp.ui.MainActivity
-import com.google.gson.Gson
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class NewsFragment : Fragment() {
     private lateinit var viewBinding: FragmentNewsBinding
+    private lateinit var viewModel: NewsViewModel
     private val articleDetailsFragment = ArticleDetailsFragment()
     private var source: Source? = null
+    private val adapter = NewsAdapter(null)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,6 +46,17 @@ class NewsFragment : Fragment() {
         initViews()
         initSearch()
         initArticle()
+        observeLiveData()
+    }
+
+    private fun initViews() {
+        viewBinding.newsRecycler.adapter = adapter
+    }
+
+    private fun initSearch() {
+        (activity as MainActivity).setOnSearchClickListener { query ->
+            viewModel.loadArticles(query)
+        }
     }
 
     private fun initArticle() {
@@ -60,93 +74,37 @@ class NewsFragment : Fragment() {
         }
     }
 
-    private fun initSearch() {
-        (activity as MainActivity).setOnSearchClickListener { query ->
-            loadArticles(query)
+    private fun observeLiveData() {
+        viewModel.isLoadingVisible.observe(viewLifecycleOwner) {
+            changeLoadingVisibility(it)
+        }
+        viewModel.message.observe(viewLifecycleOwner) {
+            showError(it)
+        }
+        viewModel.newsLiveData.observe(viewLifecycleOwner) {
+            showNewsList(it)
         }
     }
 
     fun changeSource(source: Source) {
         this.source = source
-        loadNews()
+        viewModel.loadNews(source)
     }
-
-    private fun loadNews() {
-        changeLoadingVisibility(true)
-        source?.id?.let { sourceId ->
-            ApiManager.getServices()
-                .getNews(sources = sourceId)
-                .enqueue(object : Callback<NewsResponse>{
-                    override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                        changeLoadingVisibility(false)
-                        showError(t.message)
-                    }
-
-                    override fun onResponse(
-                        call: Call<NewsResponse>,
-                        response: Response<NewsResponse>
-                    ) {
-                        changeLoadingVisibility(false)
-                        if (response.isSuccessful) {
-                            showNewsList(response.body()?.articles)
-                        } else {
-                            val responseJson = response.errorBody()?.string()
-                            val errorResponse = Gson().fromJson(
-                                responseJson,
-                                NewsResponse::class.java
-                            )
-                            showError(errorResponse.message)
-                        }
-                    }
-                })
-        }
-    }
-
-    private fun loadArticles(query: String){
-        ApiManager.getServices()
-            .getSearchArticles(query = query)
-            .enqueue(object : Callback<NewsResponse>{
-                override fun onFailure(call: Call<NewsResponse>, t: Throwable) {
-                    changeLoadingVisibility(false)
-                    showError(t.message)
-                }
-
-                override fun onResponse(
-                    call: Call<NewsResponse>,
-                    response: Response<NewsResponse>
-                ) {
-                    changeLoadingVisibility(false)
-                    if (response.isSuccessful) {
-                        showNewsList(response.body()?.articles)
-                    } else {
-                        val responseJson = response.errorBody()?.string()
-                        val errorResponse = Gson().fromJson(
-                            responseJson,
-                            NewsResponse::class.java
-                        )
-                        showError(errorResponse.message)
-                    }
-                }
-            })
-    }
-
-    private val adapter = NewsAdapter(null)
 
     private fun showNewsList(articles: List<Article?>?) {
         adapter.changeData(articles)
     }
 
-    private fun showError(message: String?) {
+    private fun showError(message: ViewMessage) {
         viewBinding.errorView.isVisible = true
-        viewBinding.errorMessage.text = message
+        viewBinding.errorMessage.text = message.message
+        viewBinding.tryAgain.text = message.posActionName
+        viewBinding.tryAgain.setOnClickListener {
+            message.posAction?.invoke()
+        }
     }
 
     private fun changeLoadingVisibility(isLoadingVisible: Boolean) {
         viewBinding.progressBar.isVisible = isLoadingVisible
     }
-
-    private fun initViews() {
-        viewBinding.newsRecycler.adapter = adapter
-    }
-
 }
