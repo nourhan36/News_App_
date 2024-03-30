@@ -14,7 +14,6 @@ import com.example.newsapp.ui.settings.SettingsFragment
 
 class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListener {
     private lateinit var viewBinding: ActivityMainBinding
-    private val newsSourcesFragment = NewsSourcesFragment()
     private val categoriesFragment = CategoriesFragment()
     private val settingsFragment = SettingsFragment()
 
@@ -71,8 +70,7 @@ class MainActivity : AppCompatActivity(), CategoriesFragment.CategoryClickListen
     }
 
     override fun onCategoryClicked(category: String) {
-        newsSourcesFragment.changeCategory(category)
-        pushFragment(newsSourcesFragment)
+        pushFragment(NewsSourcesFragment(category))
     }
 
     private fun pushFragment(fragment: Fragment) {

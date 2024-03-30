@@ -14,11 +14,10 @@ import com.example.newsapp.databinding.FragmentNewsSourcesBinding
 import com.example.newsapp.newsFragment.NewsFragment
 import com.google.android.material.tabs.TabLayout
 
-class NewsSourcesFragment : Fragment() {
+class NewsSourcesFragment(private var categories: String) : Fragment() {
     private lateinit var viewBinding: FragmentNewsSourcesBinding
     private lateinit var viewModel: SourcesViewModel
     val newsFragment = NewsFragment()
-    private var category: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +35,7 @@ class NewsSourcesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.getNewsSources(categories)
         initViews()
         observeLiveData()
     }
@@ -58,11 +58,6 @@ class NewsSourcesFragment : Fragment() {
         viewModel.sourcesLiveData.observe(viewLifecycleOwner) {
             showNewsSources(it)
         }
-    }
-
-     fun changeCategory(category: String) {
-        this.category = category
-        viewModel.getNewsSources(category)
     }
 
     private fun showNewsSources(sources: List<Source?>?) {
